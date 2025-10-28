@@ -1,342 +1,194 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>For Inaya — Rain of Love (final)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Inaya ❤️</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(270deg, #ff69b4, #b000b5, #6200ea);
+      background-size: 600% 600%;
+      animation: gradientShift 15s ease infinite;
+      font-family: "Poppins", sans-serif;
+      color: white;
+    }
 
-<style>
-  /* ===== page & background ===== */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family: "Poppins", system-ui, Arial, sans-serif;
-    overflow:hidden;
-    background: radial-gradient(circle at center, #0a0010 0%, #000 100%);
-  }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-  /* animated background subtle */
-  .bg-anim{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background: linear-gradient(90deg,#1b002b,#3a005a,#001a40,#3a005a);
-    background-size: 400% 400%;
-    animation: bgMove 18s linear infinite;
-    opacity:0.9;
-  }
-  @keyframes bgMove{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
 
-  canvas{ position:fixed; left:0; top:0; width:100%; height:100%; z-index:1; }
+    .control-panel {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+      width: 150px;
+      color: white;
+      font-size: 14px;
+      user-select: none;
+    }
 
-  /* ===== control panel ===== */
-  .controls{
-    position:fixed; left:12px; top:12px; z-index:10;
-    background: rgba(10,8,12,0.78);
-    color:#fff;
-    padding:12px; border-radius:10px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-    min-width:190px;
-  }
-  .controls label{ display:block; font-size:13px; margin-bottom:6px; }
-  .controls .row{ display:flex; align-items:center; gap:8px; }
-  .controls input[type="range"]{ width:140px; }
-  .controls input[type="color"]{ width:38px; height:26px; padding:0; border:0; background:none; }
-  /* custom language menu */
-  .lang-menu{ position:relative; width:100%; }
-  .lang-button{
-    display:flex; align-items:center; gap:8px;
-    background:#1a001a; color:#fff; border:1px solid #ff69b4; padding:8px 10px; border-radius:8px;
-    cursor:pointer; user-select:none;
-  }
-  .lang-button img{ width:20px; height:14px; object-fit:cover; border-radius:2px; }
-  .lang-options{
-    position:absolute; left:0; top:46px; right:0;
-    background:#1a001a; border:1px solid #ff69b4; border-radius:8px;
-    max-height:220px; overflow:auto; display:none; flex-direction:column; z-index:20;
-  }
-  .lang-option{
-    display:flex; align-items:center; gap:8px; padding:8px 10px; color:#fff; cursor:pointer;
-  }
-  .lang-option:hover{ background:#ff69b4; color:#000; }
+    .control-panel label {
+      display: block;
+      margin-top: 5px;
+    }
 
-  /* footer */
-  .footer{ position:fixed; right:12px; bottom:10px; color:rgba(255,182,255,0.9); z-index:10; font-weight:600; }
+    input, select {
+      width: 100%;
+      background-color: #2a003a;
+      color: white;
+      border: 1px solid #ff69b4;
+      border-radius: 8px;
+      padding: 4px;
+      font-size: 13px;
+      font-family: "Poppins", sans-serif;
+    }
 
-  /* small responsive */
-  @media(max-width:480px){
-    .controls{ left:8px; top:8px; padding:8px; min-width:160px; }
-    .controls input[type="range"]{ width:120px; }
-  }
-</style>
+    option {
+      background-color: #2a003a;
+      color: white;
+    }
+
+    .flag {
+      margin-right: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .control-panel {
+        width: 130px;
+        font-size: 12px;
+        padding: 8px;
+      }
+      input, select {
+        font-size: 12px;
+        padding: 3px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <canvas id="rainCanvas"></canvas>
 
-<!-- animated underlying gradient block -->
-<div class="bg-anim"></div>
+  <div class="control-panel">
+    <label>Vitesse 🌧️</label>
+    <input type="range" id="speed" min="1" max="10" value="5">
 
-<!-- main canvas for everything -->
-<canvas id="canvas"></canvas>
+    <label>Couleur 🎨</label>
+    <input type="color" id="colorPicker" value="#ffffff">
 
-<!-- controls -->
-<div class="controls" aria-label="Controls">
-  <label>💨 Vitesse</label>
-  <div class="row">
-    <input id="speed" type="range" min="0.4" max="3.0" step="0.1" value="1.4">
-    <span id="speedVal" style="width:28px;text-align:right;font-size:13px">1.4</span>
+    <label>Langue 🌍</label>
+    <select id="language">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="it">🇮🇹 Italiano</option>
+      <option value="pl">🇵🇱 Polski</option>
+      <option value="pt">🇵🇹 Português</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="ja">🇯🇵 日本語</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
   </div>
 
-  <label style="margin-top:8px">🎨 Couleur</label>
-  <div class="row">
-    <input id="color" type="color" value="#ff66cc">
-    <div style="flex:1;height:1px"></div>
-  </div>
+  <script>
+    const canvas = document.getElementById('rainCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const words = {
+      en: ["I love you forever", "My heart is yours", "Always with you"],
+      fr: ["Je t’aime pour toujours", "Mon cœur est à toi", "Toujours avec toi"],
+      de: ["Ich liebe dich für immer", "Mein Herz gehört dir", "Immer bei dir"],
+      es: ["Te amo para siempre", "Mi corazón es tuyo", "Siempre contigo"],
+      it: ["Ti amo per sempre", "Il mio cuore è tuo", "Sempre con te"],
+      pl: ["Kocham cię na zawsze", "Moje serce należy do ciebie", "Zawsze z tobą"],
+      pt: ["Amo-te para sempre", "Meu coração é teu", "Sempre contigo"],
+      ar: ["أحبك إلى الأبد", "قلبي لك", "دائمًا معك"],
+      ja: ["永遠に愛してる", "僕の心は君のもの", "いつも一緒に"],
+      zh: ["我永远爱你", "我的心属于你", "永远在你身边"]
+    };
+    let currentLang = 'en';
+    let drops = [];
+    let color = "#ffffff";
+    let speed = 5;
 
-  <label style="margin-top:8px">🌍 Langue</label>
-  <div class="lang-menu">
-    <div class="lang-button" id="langButton">
-      <img id="langFlag" src="https://flagcdn.com/w20/gb.png" alt="">
-      <span id="langLabel">English — I love you</span>
-      <div style="margin-left:auto">▾</div>
-    </div>
-    <div class="lang-options" id="langOptions"></div>
-  </div>
-</div>
-
-<div class="footer">For Inaya ✨</div>
-
-<script>
-/* ================== setup canvas ================== */
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-
-/* ================ languages & flags ================= */
-const LANGS = [
-  { code:'en', label:'English — I love you', text: ['I love you','My love','Forever'], flag:'https://flagcdn.com/w20/gb.png' },
-  { code:'fr', label:'Français — Je t’aime', text: ['Je t’aime','Mon amour','Pour toujours'], flag:'https://flagcdn.com/w20/fr.png' },
-  { code:'de', label:'Deutsch — Ich liebe dich', text: ['Ich liebe dich','Mein Schatz','Für immer'], flag:'https://flagcdn.com/w20/de.png' },
-  { code:'pl', label:'Polski — Kocham cię', text: ['Kocham cię','Moja miłość','Na zawsze'], flag:'https://flagcdn.com/w20/pl.png' },
-  { code:'es', label:'Español — Te amo', text: ['Te amo','Mi amor','Para siempre'], flag:'https://flagcdn.com/w20/es.png' },
-  { code:'it', label:'Italiano — Ti amo', text: ['Ti amo','Amore mio','Per sempre'], flag:'https://flagcdn.com/w20/it.png' },
-  { code:'pt', label:'Português — Eu te amo', text: ['Eu te amo','Meu amor','Para sempre'], flag:'https://flagcdn.com/w20/pt.png' },
-  { code:'ja', label:'日本語 — 愛してる', text: ['愛してる','私の愛','永遠に'], flag:'https://flagcdn.com/w20/jp.png' },
-  { code:'ar', label:'العربية — أحبك', text: ['أحبك','حبي','إلى الأبد'], flag:'https://flagcdn.com/w20/sa.png' },
-  { code:'ko', label:'한국어 — 사랑해', text: ['사랑해','내 사랑','영원히'], flag:'https://flagcdn.com/w20/kr.png' },
-];
-
-let currentLang = LANGS[0]; // default english
-
-/* populate custom language menu */
-const langOptions = document.getElementById('langOptions');
-LANGS.forEach(l=>{
-  const d = document.createElement('div');
-  d.className='lang-option';
-  d.innerHTML = `<img src="${l.flag}"><div style="white-space:nowrap">${l.label}</div>`;
-  d.addEventListener('click', ()=>{
-    setLanguage(l.code);
-    langOptions.style.display='none';
-  });
-  langOptions.appendChild(d);
-});
-
-const langButton = document.getElementById('langButton');
-const langFlag = document.getElementById('langFlag');
-const langLabel = document.getElementById('langLabel');
-langButton.addEventListener('click', ()=> {
-  langOptions.style.display = (langOptions.style.display==='flex') ? 'none' : 'flex';
-});
-function setLanguage(code){
-  const l = LANGS.find(x=>x.code===code) || LANGS[0];
-  currentLang = l;
-  langFlag.src = l.flag;
-  langLabel.textContent = l.label;
-  // refresh words for active particles
-  particles.forEach(p => p.word = randomWord());
-}
-
-/* ================ controls ================ */
-const speedRange = document.getElementById('speed');
-const speedVal = document.getElementById('speedVal');
-const colorInput = document.getElementById('color');
-speedRange.addEventListener('input', ()=>{ speed = parseFloat(speedRange.value); speedVal.textContent = speed.toFixed(1); });
-colorInput.addEventListener('input', ()=>{ wordColor = colorInput.value; });
-
-let speed = parseFloat(speedRange.value);
-let wordColor = colorInput.value;
-
-/* ================ particles/words/hearts ================ */
-const particles = [];
-const hearts = [];
-const splashes = [];
-
-function random(min,max){ return Math.random()*(max-min)+min; }
-function randomWord(){ return currentLang.text[Math.floor(Math.random()*currentLang.text.length)]; }
-
-class Word {
-  constructor(){
-    this.reset(true);
-  }
-  reset(startTop=false){
-    this.x = random(40, canvas.width-40);
-    this.y = startTop ? random(-canvas.height, 0) : random(-120, -20);
-    this.vy = random(1.5, 3.5) * speed;
-    this.size = Math.round(random(16,30));
-    this.opacity = 0;
-    this.word = randomWord();
-    this.rotate = (Math.random()-0.5)*0.08;
-  }
-  update(){
-    // accelerate slightly (gravity feel)
-    this.vy += 0.01 * (speed/1.4);
-    this.y += this.vy;
-    if(this.opacity < 1) this.opacity += 0.03;
-    if(this.y > canvas.height + 30){
-      // splash
-      splashes.push(new Splash(this.x, canvas.height-18));
-      this.reset(false);
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     }
-  }
-  draw(){
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rotate);
-    // gradient fill
-    const g = ctx.createLinearGradient(0, -this.size, 0, this.size);
-    g.addColorStop(0, wordColor);
-    g.addColorStop(0.6, '#8b5cff');
-    g.addColorStop(1, '#00d4ff');
-    ctx.fillStyle = g;
-    ctx.globalAlpha = this.opacity;
-    ctx.shadowColor = wordColor;
-    ctx.shadowBlur = 10;
-    ctx.font = `${this.size}px Poppins, Arial`;
-    ctx.textAlign = 'center';
-    ctx.fillText(this.word, 0, 0);
-    ctx.restore();
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-  }
-}
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-class Heart {
-  constructor(){
-    this.reset();
-  }
-  reset(){
-    this.x = random(20, canvas.width-20);
-    this.y = random(0, canvas.height);
-    this.vy = - (random(0.1, 0.6));
-    this.size = random(8,18);
-    this.alpha = random(0.25, 0.8);
-    this.sway = random(0.2,0.6);
-  }
-  update(){
-    this.x += Math.sin(Date.now()*0.0005 + this.sway)*0.3;
-    this.y += this.vy;
-    if(this.y < -30) { this.y = canvas.height + 20; this.x = random(0, canvas.width); }
-  }
-  draw(){
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.scale(this.size/20, this.size/20);
-    ctx.beginPath();
-    ctx.moveTo(0,6);
-    ctx.bezierCurveTo(0,-3,-10,-3,-10,6);
-    ctx.bezierCurveTo(-10,13,0,20,0,25);
-    ctx.bezierCurveTo(0,20,10,13,10,6);
-    ctx.bezierCurveTo(10,-3,0,-3,0,6);
-    ctx.fillStyle = wordColor;
-    ctx.globalAlpha = this.alpha;
-    ctx.fill();
-    ctx.restore();
-    ctx.globalAlpha = 1;
-  }
-}
+    class Drop {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.text = words[currentLang][Math.floor(Math.random() * words[currentLang].length)];
+        this.x = Math.random() * width;
+        this.y = Math.random() * -height;
+        this.size = 20 + Math.random() * 10;
+        this.speed = speed + Math.random() * 2;
+      }
+      update() {
+        this.y += this.speed;
+        if (this.y > height) this.reset();
+      }
+      draw() {
+        ctx.font = `${this.size}px Poppins`;
+        ctx.fillStyle = color;
+        ctx.fillText(this.text, this.x, this.y);
+      }
+    }
 
-class Splash {
-  constructor(x,y){ this.x=x; this.y=y; this.r=2; this.a=0.8; }
-  update(){ this.r += 1.4; this.a -= 0.03; }
-  draw(){
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
-    ctx.strokeStyle = `rgba(255,255,255,${this.a})`;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-  }
-}
+    function createDrops() {
+      drops = [];
+      for (let i = 0; i < 30; i++) drops.push(new Drop());
+    }
+    createDrops();
 
-/* seed particles */
-function init(){
-  particles.length=0; hearts.length=0; splashes.length=0;
-  const pcount = Math.round(Math.max(30, Math.min(120, (canvas.width*canvas.height)/90000)));
-  for(let i=0;i<pcount;i++) particles.push(new Word());
-  for(let i=0;i<22;i++) hearts.push(new Heart());
-}
-init();
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (let drop of drops) {
+        drop.update();
+        drop.draw();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
 
-/* animation loop */
-function loop(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // draw background subtle dim overlay (so gradient remains visible)
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+    document.getElementById('speed').addEventListener('input', e => {
+      speed = parseInt(e.target.value);
+      createDrops();
+    });
 
-  // hearts behind words
-  hearts.forEach(h=>{ h.update(); h.draw(); });
+    document.getElementById('colorPicker').addEventListener('input', e => {
+      color = e.target.value;
+    });
 
-  // words
-  for(let w of particles){ w.update(); w.draw(); }
-
-  // splashes
-  for(let i=splashes.length-1;i>=0;i--){
-    splashes[i].update();
-    splashes[i].draw();
-    if(splashes[i].a <= 0) splashes.splice(i,1);
-  }
-
-  requestAnimationFrame(loop);
-}
-loop();
-
-/* control events */
-speedRange = document.getElementById('speed');
-speedRange.addEventListener('input', ()=>{ speed = parseFloat(speedRange.value); document.getElementById('speedVal').textContent = speed.toFixed(1); });
-colorInput = document.getElementById('color');
-colorInput.addEventListener('input', ()=>{ wordColor = colorInput.value; });
-
-/* language switching (custom menu) */
-function changeLanguage(code){
-  const L = LANGS.find(x=>x.code===code) || LANGS[0];
-  currentLang = L;
-  // update displayed label / flag (already handled in setLanguage)
-}
-/* setLanguage function used earlier */
-function setLanguage(code){
-  const L = LANGS.find(x=>x.code===code) || LANGS[0];
-  currentLang = L;
-  document.getElementById('langFlag').src = L.flag;
-  document.getElementById('langLabel').textContent = L.label;
-  // change words on existing particles
-  particles.forEach(p => p.word = randomWord());
-}
-
-/* close language menu when clicking outside */
-document.addEventListener('click', (e)=>{
-  const menu = document.getElementById('langOptions');
-  if(!document.getElementById('langButton').contains(e.target)) menu.style.display = 'none';
-});
-
-/* ensure canvas size on load/resize */
-window.addEventListener('resize', ()=>{
-  resize();
-  init();
-});
-
-/* initialize UI default */
-document.getElementById('langFlag').src = LANGS[0].flag;
-document.getElementById('langLabel').textContent = LANGS[0].label;
-</script>
-
+    document.getElementById('language').addEventListener('change', e => {
+      currentLang = e.target.value;
+      createDrops();
+    });
+  </script>
 </body>
 </html>
