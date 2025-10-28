@@ -83,41 +83,45 @@
   let words = ["Je t’aime Inaya"];
 
   const languages = {
-    fr: ["Je t’aime Inaya", "Mon amour 💖"],
-    en: ["I love you Inaya", "My love 💕"],
-    de: ["Ich liebe dich Inaya", "Mein Schatz 💞"],
-    pl: ["Kocham cię Inaya", "Moja miłość 💘"]
+    fr: ["Je t’aime Inaya", "Mon amour 💖", "Toujours 💞"],
+    en: ["I love you Inaya", "My love 💕", "Forever 💘"],
+    de: ["Ich liebe dich Inaya", "Mein Schatz 💞", "Für immer 💗"],
+    pl: ["Kocham cię Inaya", "Moja miłość 💘", "Na zawsze 💕"]
   };
 
   canvas.height = window.innerHeight;
   canvas.width = window.innerWidth;
 
-  const fontSize = 16;
-  const columns = canvas.width / fontSize;
-  const drops = Array.from({ length: columns }).fill(1);
+  const fontSize = 20;
+  const columns = Math.floor(canvas.width / (fontSize * 3)); // plus espacé
+  const drops = Array.from({ length: columns }).map(() => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    text: words[Math.floor(Math.random() * words.length)],
+    speed: Math.random() * 2 + 1
+  }));
 
   function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = color;
     ctx.font = fontSize + "px monospace";
 
-    for (let i = 0; i < drops.length; i++) {
-      const text = words[Math.floor(Math.random() * words.length)];
-      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
-        drops[i] = 0;
-      drops[i]++;
-    }
+    drops.forEach(drop => {
+      ctx.fillText(drop.text, drop.x, drop.y);
+      drop.y += drop.speed * (speed / 50);
+      if (drop.y > canvas.height + 20) {
+        drop.y = -20;
+        drop.x = Math.random() * canvas.width;
+        drop.text = words[Math.floor(Math.random() * words.length)];
+      }
+    });
   }
 
-  let interval = setInterval(draw, speed);
+  let interval = setInterval(draw, 50);
 
   speedControl.oninput = () => {
-    speed = 100 - speedControl.value;
-    clearInterval(interval);
-    interval = setInterval(draw, speed);
+    speed = speedControl.value;
   };
 
   colorPicker.oninput = () => {
