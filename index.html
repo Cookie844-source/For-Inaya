@@ -7,9 +7,10 @@
 <style>
   body {
     margin: 0;
-    background: radial-gradient(circle at center, #0a0010 0%, #000 100%);
     overflow: hidden;
+    background: radial-gradient(circle at center, #1a001f 0%, #000 100%);
     font-family: monospace;
+    color: white;
   }
 
   canvas {
@@ -23,8 +24,8 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 15px;
     border-radius: 10px;
     z-index: 10;
     color: white;
@@ -33,7 +34,7 @@
 
   label {
     display: block;
-    margin-top: 6px;
+    margin-top: 8px;
   }
 </style>
 </head>
@@ -41,10 +42,10 @@
 
 <div id="controls">
   <label>💨 Vitesse :
-    <input type="range" id="speed" min="10" max="100" value="70">
+    <input type="range" id="speed" min="20" max="120" value="80">
   </label>
   <label>🎨 Couleur :
-    <input type="color" id="color" value="#ff69b4">
+    <input type="color" id="color" value="#ff66cc">
   </label>
   <label>🌍 Langue :
     <select id="lang">
@@ -61,36 +62,36 @@
 <script>
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
+
   const speedControl = document.getElementById('speed');
   const colorPicker = document.getElementById('color');
   const langSelect = document.getElementById('lang');
 
   let color = colorPicker.value;
-  let speed = 70;
+  let speed = 80;
 
   const languages = {
     fr: ["Je t’aime 💖", "Mon amour 💞", "Pour toujours ❤️"],
-    en: ["I love you 💕", "My love 💘", "Forever 💖"],
+    en: ["I love you 💕", "My love 💘", "Forever yours 💖"],
     de: ["Ich liebe dich 💞", "Mein Schatz 💕", "Für immer 💗"],
     pl: ["Kocham cię 💘", "Moja miłość 💕", "Na zawsze 💖"]
   };
 
   let words = languages.en;
 
-  canvas.height = window.innerHeight;
   canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  const fontSize = 26;
-  const gravity = 0.05;
   const drops = [];
-  const splashes = [];
+  const gravity = 0.35;
+  const fontSize = 24;
 
   function createDrop() {
-    if (drops.length < 80 && Math.random() < 0.25) {
+    if (drops.length < 60 && Math.random() < 0.3) {
       drops.push({
         x: Math.random() * canvas.width,
         y: -40,
-        vy: Math.random() * 2 + 1,
+        vy: Math.random() * 2 + 3,
         text: words[Math.floor(Math.random() * words.length)],
         opacity: 0
       });
@@ -98,81 +99,40 @@
   }
 
   function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + "px monospace";
     ctx.textAlign = "center";
 
-    // --- Dessine les gouttes ---
     for (let i = 0; i < drops.length; i++) {
       const d = drops[i];
-      d.opacity = Math.min(d.opacity + 0.04, 1);
+      d.opacity = Math.min(d.opacity + 0.05, 1);
       ctx.fillStyle = color;
       ctx.globalAlpha = d.opacity;
       ctx.shadowColor = color;
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 12;
       ctx.fillText(d.text, d.x, d.y);
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
 
-      d.vy += gravity * (speed / 50);
+      d.vy += gravity * (speed / 60);
       d.y += d.vy;
 
-      // quand le mot touche le bas
-      if (d.y > canvas.height - 10) {
-        createSplash(d.x, canvas.height - 10);
-        drops.splice(i, 1);
-      }
-    }
-
-    // --- Effet éclaboussure ---
-    for (let i = 0; i < splashes.length; i++) {
-      const s = splashes[i];
-      s.radius += 1.5;
-      s.alpha -= 0.03;
-      if (s.alpha <= 0) {
-        splashes.splice(i, 1);
-        continue;
-      }
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = s.alpha;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+      if (d.y > canvas.height + 50) drops.splice(i, 1);
     }
 
     createDrop();
   }
 
-  function createSplash(x, y) {
-    splashes.push({
-      x,
-      y,
-      radius: 5,
-      alpha: 0.6
-    });
-  }
-
   setInterval(draw, 40);
 
-  speedControl.oninput = () => {
-    speed = speedControl.value;
-  };
-
-  colorPicker.oninput = () => {
-    color = colorPicker.value;
-  };
-
-  langSelect.onchange = () => {
-    const selected = langSelect.value;
-    words = languages[selected];
-  };
+  speedControl.oninput = () => (speed = speedControl.value);
+  colorPicker.oninput = () => (color = colorPicker.value);
+  langSelect.onchange = () => (words = languages[langSelect.value]);
 
   window.addEventListener("resize", () => {
-    canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   });
 </script>
 
