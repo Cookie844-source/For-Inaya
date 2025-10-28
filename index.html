@@ -50,10 +50,16 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 let words = [
-  "Je t’aime pour toujours",
-  "I love you forever",
-  "Ich liebe dich für immer",
-  "Kocham cię na zawsze"
+  "Je t’aime pour toujours",      // Français
+  "I love you forever",           // Anglais
+  "Ich liebe dich für immer",     // Allemand
+  "Kocham cię na zawsze",         // Polonais
+  "Te amo para siempre",          // Espagnol
+  "Ti amo per sempre",            // Italien
+  "Eu te amo para sempre",        // Portugais
+  "愛してる 永遠に",             // Japonais
+  "أحبك إلى الأبد",             // Arabe
+  "영원히 사랑해",              // Coréen
 ];
 
 let drops = [];
@@ -61,8 +67,7 @@ let hearts = [];
 let stars = [];
 let lightMode = false;
 
-// Création des mots
-for (let i = 0; i < 60; i++) {
+for (let i = 0; i < 70; i++) {
   drops.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height - canvas.height,
@@ -72,7 +77,6 @@ for (let i = 0; i < 60; i++) {
   });
 }
 
-// Cœurs flottants
 for (let i = 0; i < 20; i++) {
   hearts.push({
     x: Math.random() * canvas.width,
@@ -83,7 +87,6 @@ for (let i = 0; i < 20; i++) {
   });
 }
 
-// Étoiles et papillons
 for (let i = 0; i < 30; i++) {
   stars.push({
     x: Math.random() * canvas.width,
@@ -128,6 +131,22 @@ function drawStars() {
   ctx.globalAlpha = 1;
 }
 
+let splashes = [];
+function splash(x, y) {
+  splashes.push({x, y, radius: 1, alpha: 1});
+}
+function drawSplashes() {
+  splashes.forEach((s, i) => {
+    ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    s.radius += 0.8;
+    s.alpha -= 0.02;
+    if (s.alpha <= 0) splashes.splice(i, 1);
+  });
+}
+
 function drawDrops() {
   drops.forEach(d => {
     const grad = ctx.createLinearGradient(d.x, d.y - d.size, d.x, d.y + d.size);
@@ -147,22 +166,6 @@ function drawDrops() {
   });
 }
 
-let splashes = [];
-function splash(x, y) {
-  splashes.push({x, y, radius: 1, alpha: 1});
-}
-function drawSplashes() {
-  splashes.forEach((s, i) => {
-    ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-    ctx.stroke();
-    s.radius += 0.8;
-    s.alpha -= 0.02;
-    if (s.alpha <= 0) splashes.splice(i, 1);
-  });
-}
-
 function animate() {
   drawGradientBackground();
   drawStars();
@@ -171,7 +174,6 @@ function animate() {
   drawSplashes();
   requestAnimationFrame(animate);
 }
-
 animate();
 
 // 🌙 Bouton jour/nuit
