@@ -1,205 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For Inaya 💕</title>
+<title>For Inaya 💖</title>
 <style>
-  body {
+  html, body {
     margin: 0;
+    padding: 0;
     overflow: hidden;
-    background: radial-gradient(circle at center, #1a0025 0%, #000 100%);
-    font-family: monospace;
+    height: 100%;
+    background: radial-gradient(circle at top, #0a0a0a, #000);
   }
 
-  #bgCanvas, #matrix {
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #toggleMode {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 15px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff8bd1, #8b5cff);
+    box-shadow: 0 0 10px #ff8bd1;
+    transition: transform 0.3s, box-shadow 0.3s;
   }
-
-  #bgCanvas {
-    z-index: 0;
-  }
-
-  #matrix {
-    z-index: 1;
-  }
-
-  #controls {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 12px 15px;
-    border-radius: 10px;
-    z-index: 10;
-    color: white;
-    font-size: 14px;
-  }
-
-  label {
-    display: block;
-    margin-top: 8px;
+  #toggleMode:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ffbdf0;
   }
 </style>
 </head>
 <body>
-
-<div id="controls">
-  <label>💨 Vitesse :
-    <input type="range" id="speed" min="20" max="120" value="80">
-  </label>
-  <label>🎨 Couleur :
-    <input type="color" id="color" value="#ff66cc">
-  </label>
-  <label>🌍 Langue :
-    <select id="lang">
-      <option value="en" selected>Anglais (I love you)</option>
-      <option value="fr">Français (Je t’aime)</option>
-      <option value="de">Allemand (Ich liebe dich)</option>
-      <option value="pl">Polonais (Kocham cię)</option>
-    </select>
-  </label>
-</div>
-
-<canvas id="bgCanvas"></canvas>
-<canvas id="matrix"></canvas>
+<canvas id="loveCanvas"></canvas>
+<button id="toggleMode"></button>
 
 <script>
-  const bgCanvas = document.getElementById('bgCanvas');
-  const bgCtx = bgCanvas.getContext('2d');
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('loveCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-  function resizeCanvas() {
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+let words = [
+  "Je t’aime pour toujours",
+  "I love you forever",
+  "Ich liebe dich für immer",
+  "Kocham cię na zawsze"
+];
 
-  // --- Fond animé visible ---
-  const particles = [];
-  for (let i = 0; i < 100; i++) {
-    particles.push({
-      x: Math.random() * bgCanvas.width,
-      y: Math.random() * bgCanvas.height,
-      r: Math.random() * 3 + 1.5,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.3,
-      alpha: Math.random(),
-      flicker: Math.random() * 0.05 + 0.01
-    });
-  }
+let drops = [];
+let hearts = [];
+let stars = [];
+let lightMode = false;
 
-  let gradientShift = 0;
-  function drawBackground() {
-    gradientShift += 0.002;
-    const gradient = bgCtx.createRadialGradient(
-      bgCanvas.width / 2 + Math.sin(gradientShift) * 200,
-      bgCanvas.height / 2 + Math.cos(gradientShift) * 200,
-      100,
-      bgCanvas.width / 2,
-      bgCanvas.height / 2,
-      bgCanvas.width / 1.2
-    );
-    gradient.addColorStop(0, "#2a003a");
-    gradient.addColorStop(1, "#000");
+// Création des mots
+for (let i = 0; i < 60; i++) {
+  drops.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    speed: 2 + Math.random() * 3,
+    text: words[Math.floor(Math.random() * words.length)],
+    size: 20 + Math.random() * 10
+  });
+}
 
-    bgCtx.fillStyle = gradient;
-    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+// Cœurs flottants
+for (let i = 0; i < 20; i++) {
+  hearts.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: 10 + Math.random() * 15,
+    speed: 0.5 + Math.random() * 0.5,
+    opacity: 0.4 + Math.random() * 0.6
+  });
+}
 
-    for (let p of particles) {
-      p.alpha += (Math.random() - 0.5) * p.flicker;
-      p.alpha = Math.max(0.1, Math.min(1, p.alpha));
+// Étoiles et papillons
+for (let i = 0; i < 30; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: 2 + Math.random() * 3,
+    twinkle: Math.random()
+  });
+}
 
-      bgCtx.beginPath();
-      bgCtx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-      bgCtx.fillStyle = `rgba(255, 130, 230, ${p.alpha})`;
-      bgCtx.shadowColor = "#ff66cc";
-      bgCtx.shadowBlur = 15;
-      bgCtx.fill();
+function drawGradientBackground() {
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#ff77e9');
+  gradient.addColorStop(0.5, '#8b5cff');
+  gradient.addColorStop(1, '#00d4ff');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-      p.x += p.dx;
-      p.y += p.dy;
+function drawHearts() {
+  hearts.forEach(h => {
+    ctx.globalAlpha = h.opacity;
+    ctx.fillStyle = "#ff7eb9";
+    ctx.beginPath();
+    ctx.moveTo(h.x, h.y);
+    ctx.bezierCurveTo(h.x - h.size/2, h.y - h.size/2, h.x - h.size, h.y + h.size/3, h.x, h.y + h.size);
+    ctx.bezierCurveTo(h.x + h.size, h.y + h.size/3, h.x + h.size/2, h.y - h.size/2, h.x, h.y);
+    ctx.fill();
+    h.y -= h.speed;
+    if (h.y < -10) h.y = canvas.height + 10;
+  });
+  ctx.globalAlpha = 1;
+}
 
-      if (p.x < 0 || p.x > bgCanvas.width) p.dx *= -1;
-      if (p.y < 0 || p.y > bgCanvas.height) p.dy *= -1;
+function drawStars() {
+  stars.forEach(s => {
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + s.twinkle);
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawDrops() {
+  drops.forEach(d => {
+    const grad = ctx.createLinearGradient(d.x, d.y - d.size, d.x, d.y + d.size);
+    grad.addColorStop(0, "#ff7ae6");
+    grad.addColorStop(0.5, "#8b5cff");
+    grad.addColorStop(1, "#00d4ff");
+    ctx.fillStyle = grad;
+    ctx.font = `${d.size}px Arial`;
+    ctx.fillText(d.text, d.x, d.y);
+    d.y += d.speed;
+    if (d.y > canvas.height) {
+      splash(d.x, canvas.height - 10);
+      d.y = -20;
+      d.x = Math.random() * canvas.width;
+      d.text = words[Math.floor(Math.random() * words.length)];
     }
+  });
+}
+
+let splashes = [];
+function splash(x, y) {
+  splashes.push({x, y, radius: 1, alpha: 1});
+}
+function drawSplashes() {
+  splashes.forEach((s, i) => {
+    ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    s.radius += 0.8;
+    s.alpha -= 0.02;
+    if (s.alpha <= 0) splashes.splice(i, 1);
+  });
+}
+
+function animate() {
+  drawGradientBackground();
+  drawStars();
+  drawHearts();
+  drawDrops();
+  drawSplashes();
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// 🌙 Bouton jour/nuit
+document.getElementById("toggleMode").addEventListener("click", () => {
+  lightMode = !lightMode;
+  if (lightMode) {
+    document.body.style.background = "radial-gradient(circle at top, #ffe3f8, #ffb6e6)";
+  } else {
+    document.body.style.background = "radial-gradient(circle at top, #0a0a0a, #000)";
   }
-
-  // --- Texte pluie ---
-  const speedControl = document.getElementById('speed');
-  const colorPicker = document.getElementById('color');
-  const langSelect = document.getElementById('lang');
-
-  let color = colorPicker.value;
-  let speed = 80;
-
-  const languages = {
-    fr: ["Je t’aime 💖", "Mon amour 💞", "Pour toujours ❤️"],
-    en: ["I love you 💕", "My love 💘", "Forever yours 💖"],
-    de: ["Ich liebe dich 💞", "Mein Schatz 💕", "Für immer 💗"],
-    pl: ["Kocham cię 💘", "Moja miłość 💕", "Na zawsze 💖"]
-  };
-
-  let words = languages.en;
-  const drops = [];
-  const gravity = 0.35;
-  const fontSize = 24;
-
-  function createDrop() {
-    if (drops.length < 70 && Math.random() < 0.3) {
-      drops.push({
-        x: Math.random() * canvas.width,
-        y: -40,
-        vy: Math.random() * 2 + 3,
-        text: words[Math.floor(Math.random() * words.length)],
-        opacity: 0
-      });
-    }
-  }
-
-  function drawRain() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = fontSize + "px monospace";
-    ctx.textAlign = "center";
-
-    for (let i = 0; i < drops.length; i++) {
-      const d = drops[i];
-      d.opacity = Math.min(d.opacity + 0.05, 1);
-      ctx.fillStyle = color;
-      ctx.globalAlpha = d.opacity;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 10;
-      ctx.fillText(d.text, d.x, d.y);
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-
-      d.vy += gravity * (speed / 60);
-      d.y += d.vy;
-
-      if (d.y > canvas.height + 50) drops.splice(i, 1);
-    }
-
-    createDrop();
-  }
-
-  function animate() {
-    drawBackground();
-    drawRain();
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  speedControl.oninput = () => (speed = speedControl.value);
-  colorPicker.oninput = () => (color = colorPicker.value);
-  langSelect.onchange = () => (words = languages[langSelect.value]);
+});
 </script>
-
 </body>
 </html>
