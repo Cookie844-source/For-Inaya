@@ -1,313 +1,203 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <style>
-/* Style du menu déroulant */
-select {
-  background-color: #2a003a !important;
-  color: #fff !important;
-  border: 1px solid #ff69b4;
-  border-radius: 8px;
-  padding: 6px;
-  outline: none;
-  font-family: 'Poppins', sans-serif;
-}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Inaya 💖</title>
 
-/* Corrige la liste déroulante */
-option {
-  background-color: #2a003a;
-  color: #fff;
-}
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    background: linear-gradient(135deg, #2b004b, #4b0078, #2b004b);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+    font-family: "Poppins", sans-serif;
+  }
+
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* 🌙 panneau de contrôle */
+  .controls {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 12px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 0 12px rgba(255, 0, 200, 0.4);
+  }
+
+  .controls label {
+    display: block;
+    margin: 6px 0 3px;
+  }
+
+  input[type="color"], input[type="range"], select {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  /* 🌈 style du menu langue */
+  select {
+    background-color: #2a003a !important;
+    color: #fff !important;
+    border: 1px solid #ff69b4;
+    border-radius: 8px;
+    padding: 6px;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  select option {
+    background-color: #2a003a;
+    color: #fff;
+  }
+
+  /* texte bas */
+  .footer {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    color: #ffb6ff;
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
 </style>
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For Inaya ✨</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      overflow: hidden;
-      height: 100vh;
-      background: linear-gradient(45deg, #160020, #3a005a, #001a40);
-      background-size: 300% 300%;
-      animation: gradientMove 12s ease infinite;
-      font-family: "Poppins", sans-serif;
-    }
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    canvas { position: absolute; top: 0; left: 0; }
-
-    .control-panel {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(20, 20, 20, 0.85);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
-      z-index: 10;
-    }
-
-    .control-panel label {
-      display: block;
-      margin-top: 8px;
-      font-weight: 500;
-    }
-
-    input[type="color"], input[type="range"] {
-      margin-top: 4px;
-      width: 150px;
-    }
-
-    /* Menu langue personnalisé */
-    .language-menu {
-      position: relative;
-      width: 180px;
-      margin-top: 8px;
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .selected-lang {
-      background-color: #1a001a;
-      border: 1px solid #ff69b4;
-      border-radius: 8px;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #fff;
-    }
-
-    .selected-lang img {
-      width: 20px;
-      height: 14px;
-      margin-right: 6px;
-    }
-
-    .language-options {
-      position: absolute;
-      top: 40px;
-      left: 0;
-      right: 0;
-      background-color: #1a001a;
-      border: 1px solid #ff69b4;
-      border-radius: 8px;
-      display: none;
-      flex-direction: column;
-      z-index: 20;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-
-    .language-option {
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      color: #fff;
-      transition: background 0.2s;
-    }
-
-    .language-option:hover {
-      background-color: #ff69b4;
-      color: #000;
-    }
-
-    .language-option img {
-      width: 20px;
-      height: 14px;
-      margin-right: 6px;
-      border-radius: 3px;
-    }
-
-    #signature {
-      position: absolute;
-      bottom: 10px;
-      right: 15px;
-      color: #ffb6e6;
-      font-size: 14px;
-      opacity: 0.8;
-    }
-  </style>
 </head>
-<body>
-  <canvas id="rain"></canvas>
 
-  <div class="control-panel">
-    <label>🌸 Vitesse :
-      <input type="range" id="speedControl" min="0.5" max="5" value="2" step="0.1">
-    </label>
-    <label>💖 Couleur :
-      <input type="color" id="colorControl" value="#ff69b4">
-    </label>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="controls">
+    <label>🌟 Vitesse :</label>
+    <input type="range" id="speed" min="0.5" max="3" step="0.1" value="1">
+
+    <label>🎨 Couleur :</label>
+    <input type="color" id="color" value="#ff69b4">
+
     <label>🌍 Langue :</label>
-    <div class="language-menu" id="langMenu">
-      <div class="selected-lang" id="selectedLang">
-        <img src="https://flagcdn.com/w20/gb.png" alt="flag">
-        <span>English — I love you forever</span>
-      </div>
-      <div class="language-options" id="langOptions"></div>
-    </div>
+    <select id="language">
+      <option value="en">🇬🇧 English — I love you forever</option>
+      <option value="fr">🇫🇷 Français — Je t’aime pour toujours</option>
+      <option value="es">🇪🇸 Español — Te amo para siempre</option>
+      <option value="de">🇩🇪 Deutsch — Ich liebe dich für immer</option>
+      <option value="it">🇮🇹 Italiano — Ti amo per sempre</option>
+      <option value="pt">🇵🇹 Português — Eu te amo para sempre</option>
+      <option value="pl">🇵🇱 Polski — Kocham cię na zawsze</option>
+      <option value="ar">🇸🇦 العربية — أحبك إلى الأبد</option>
+      <option value="ja">🇯🇵 日本語 — 永遠に愛してる</option>
+      <option value="ko">🇰🇷 한국어 — 영원히 사랑해</option>
+    </select>
   </div>
 
-  <div id="signature">For Inaya ✨</div>
+  <div class="footer">For Inaya ✨</div>
 
   <script>
-    const canvas = document.getElementById("rain");
+    const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-    let width = window.innerWidth, height = window.innerHeight;
-    canvas.width = width; canvas.height = height;
 
-    const messages = {
-      en: "I love you forever",
-      fr: "Je t’aime pour toujours",
-      de: "Ich liebe dich für immer",
-      pl: "Kocham cię na zawsze",
-      es: "Te amo para siempre",
-      it: "Ti amo per sempre",
-      pt: "Eu te amo para sempre",
-      ja: "永遠にあなたを愛しています",
-      ar: "أحبك إلى الأبد",
-      ko: "영원히 사랑해"
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const wordsByLang = {
+      en: ["I love you", "Forever", "My love"],
+      fr: ["Je t’aime", "Pour toujours", "Mon amour"],
+      es: ["Te amo", "Para siempre", "Mi amor"],
+      de: ["Ich liebe dich", "Für immer", "Meine Liebe"],
+      it: ["Ti amo", "Per sempre", "Amore mio"],
+      pt: ["Eu te amo", "Para sempre", "Meu amor"],
+      pl: ["Kocham cię", "Na zawsze", "Moja miłość"],
+      ar: ["أحبك", "إلى الأبد", "حبي"],
+      ja: ["愛してる", "永遠に", "私の愛"],
+      ko: ["사랑해", "영원히", "내 사랑"]
     };
 
-    const flags = {
-      en: "https://flagcdn.com/w20/gb.png",
-      fr: "https://flagcdn.com/w20/fr.png",
-      de: "https://flagcdn.com/w20/de.png",
-      pl: "https://flagcdn.com/w20/pl.png",
-      es: "https://flagcdn.com/w20/es.png",
-      it: "https://flagcdn.com/w20/it.png",
-      pt: "https://flagcdn.com/w20/pt.png",
-      ja: "https://flagcdn.com/w20/jp.png",
-      ar: "https://flagcdn.com/w20/sa.png",
-      ko: "https://flagcdn.com/w20/kr.png"
-    };
+    let particles = [];
+    let speed = 1;
+    let color = "#ff69b4";
+    let language = "en";
 
-    const langMenu = document.getElementById("langMenu");
-    const selectedLang = document.getElementById("selectedLang");
-    const langOptions = document.getElementById("langOptions");
-
-    const langList = Object.keys(messages);
-
-    // Remplir le menu
-    langList.forEach(code => {
-      const opt = document.createElement("div");
-      opt.classList.add("language-option");
-      opt.innerHTML = `<img src="${flags[code]}" alt="${code}"> ${messages[code]}`;
-      opt.onclick = () => setLanguage(code);
-      langOptions.appendChild(opt);
-    });
-
-    let lang = "en", speed = 2, color = "#ff69b4";
-    const hearts = [], particles = [], splashes = [], texts = [];
-    const heartCount = 40, textCount = 25;
-
-    // Menu déroulant
-    selectedLang.onclick = () => {
-      langOptions.style.display = langOptions.style.display === "flex" ? "none" : "flex";
-    };
-
-    function setLanguage(code) {
-      lang = code;
-      selectedLang.innerHTML = `<img src="${flags[code]}" alt="${code}"> <span>${messages[code]}</span>`;
-      langOptions.style.display = "none";
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
     }
 
-    // Cœurs
-    for (let i = 0; i < heartCount; i++) {
-      hearts.push({ x: Math.random() * width, y: Math.random() * height, size: Math.random() * 8 + 4, speed: Math.random() * 0.5 + 0.2, opacity: Math.random() * 0.6 + 0.2 });
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = random(0, width);
+        this.y = random(-height, 0);
+        this.size = random(14, 26);
+        this.word = wordsByLang[language][Math.floor(Math.random() * 3)];
+        this.speed = random(0.8, 2.5) * speed;
+        this.opacity = random(0.6, 1);
+      }
+      update() {
+        this.y += this.speed;
+        if (this.y > height + 50) this.reset();
+      }
+      draw() {
+        ctx.font = `${this.size}px Poppins`;
+        ctx.fillStyle = color;
+        ctx.globalAlpha = this.opacity;
+        ctx.fillText(this.word, this.x, this.y);
+        ctx.globalAlpha = 1;
+      }
     }
 
-    // Textes
-    function createText() {
-      texts.push({ text: messages[lang], x: Math.random() * width, y: -50, speed: Math.random() * 1.5 + speed, size: Math.random() * 24 + 20 });
+    function createParticles() {
+      particles = [];
+      for (let i = 0; i < 80; i++) {
+        particles.push(new Particle());
+      }
     }
 
-    // Particules
-    for (let i = 0; i < 60; i++)
-      particles.push({ x: Math.random() * width, y: Math.random() * height, radius: Math.random() * 2, opacity: Math.random(), speed: Math.random() * 0.3 + 0.2 });
-
-    function draw() {
+    function animate() {
       ctx.clearRect(0, 0, width, height);
-
-      hearts.forEach(h => {
-        ctx.fillStyle = `rgba(255, 105, 180, ${h.opacity})`;
-        ctx.font = `${h.size}px Arial`;
-        ctx.fillText("♥", h.x, h.y);
-        h.y -= h.speed;
-        if (h.y < -10) h.y = height + 10;
-      });
-
       particles.forEach(p => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
-        p.y += p.speed;
-        if (p.y > height) p.y = 0;
+        p.update();
+        p.draw();
       });
-
-      texts.forEach((t, i) => {
-        const gradient = ctx.createLinearGradient(t.x, t.y, t.x, t.y + t.size);
-        gradient.addColorStop(0, "#ff69b4");
-        gradient.addColorStop(1, "#b26bff");
-        ctx.fillStyle = gradient;
-        ctx.font = `${t.size}px Poppins`;
-        ctx.fillText(t.text, t.x, t.y);
-        t.y += t.speed;
-        if (t.y > height) {
-          texts.splice(i, 1);
-          createSplash(t.x, height - 10);
-        }
-      });
-
-      splashes.forEach((s, i) => {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 105, 180, ${s.opacity})`;
-        ctx.stroke();
-        s.radius += 1;
-        s.opacity -= 0.02;
-        if (s.opacity <= 0) splashes.splice(i, 1);
-      });
-
-      requestAnimationFrame(draw);
+      requestAnimationFrame(animate);
     }
-
-    function createSplash(x, y) {
-      splashes.push({ x, y, radius: 2, opacity: 0.6 });
-    }
-
-    setInterval(() => createText(), 800);
-    draw();
-
-    document.getElementById("speedControl").addEventListener("input", e => speed = parseFloat(e.target.value));
-    document.getElementById("colorControl").addEventListener("input", e => color = e.target.value);
 
     window.addEventListener("resize", () => {
-      width = window.innerWidth; height = window.innerHeight;
-      canvas.width = width; canvas.height = height;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      createParticles();
     });
+
+    document.getElementById("speed").addEventListener("input", e => {
+      speed = parseFloat(e.target.value);
+    });
+
+    document.getElementById("color").addEventListener("input", e => {
+      color = e.target.value;
+    });
+
+    document.getElementById("language").addEventListener("change", e => {
+      language = e.target.value;
+      createParticles();
+    });
+
+    createParticles();
+    animate();
   </script>
 </body>
 </html>
-select {
-  background-color: #1a001a !important;
-  color: #fff !important;
-  border: 1px solid #ff69b4;
-  border-radius: 8px;
-  padding: 6px;
-  outline: none;
-  font-family: "Poppins", sans-serif;
-}
-
-/* Corrige la liste déroulante */
-option {
-  background-color: #1a001a;
-  color: #fff;
-}
