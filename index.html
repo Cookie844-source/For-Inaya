@@ -68,7 +68,6 @@
   let color = colorPicker.value;
   let speed = 70;
 
-  // Définition des langues
   const languages = {
     fr: ["Je t’aime 💖", "Mon amour 💞", "Pour toujours ❤️"],
     en: ["I love you 💕", "My love 💘", "Forever 💖"],
@@ -76,5 +75,106 @@
     pl: ["Kocham cię 💘", "Moja miłość 💕", "Na zawsze 💖"]
   };
 
-  // Démarre en anglais
-  let wor
+  let words = languages.en;
+
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+
+  const fontSize = 26;
+  const gravity = 0.05;
+  const drops = [];
+  const splashes = [];
+
+  function createDrop() {
+    if (drops.length < 80 && Math.random() < 0.25) {
+      drops.push({
+        x: Math.random() * canvas.width,
+        y: -40,
+        vy: Math.random() * 2 + 1,
+        text: words[Math.floor(Math.random() * words.length)],
+        opacity: 0
+      });
+    }
+  }
+
+  function draw() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontSize + "px monospace";
+    ctx.textAlign = "center";
+
+    // --- Dessine les gouttes ---
+    for (let i = 0; i < drops.length; i++) {
+      const d = drops[i];
+      d.opacity = Math.min(d.opacity + 0.04, 1);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = d.opacity;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+      ctx.fillText(d.text, d.x, d.y);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      d.vy += gravity * (speed / 50);
+      d.y += d.vy;
+
+      // quand le mot touche le bas
+      if (d.y > canvas.height - 10) {
+        createSplash(d.x, canvas.height - 10);
+        drops.splice(i, 1);
+      }
+    }
+
+    // --- Effet éclaboussure ---
+    for (let i = 0; i < splashes.length; i++) {
+      const s = splashes[i];
+      s.radius += 1.5;
+      s.alpha -= 0.03;
+      if (s.alpha <= 0) {
+        splashes.splice(i, 1);
+        continue;
+      }
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = s.alpha;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    createDrop();
+  }
+
+  function createSplash(x, y) {
+    splashes.push({
+      x,
+      y,
+      radius: 5,
+      alpha: 0.6
+    });
+  }
+
+  setInterval(draw, 40);
+
+  speedControl.oninput = () => {
+    speed = speedControl.value;
+  };
+
+  colorPicker.oninput = () => {
+    color = colorPicker.value;
+  };
+
+  langSelect.onchange = () => {
+    const selected = langSelect.value;
+    words = languages[selected];
+  };
+
+  window.addEventListener("resize", () => {
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+  });
+</script>
+
+</body>
+</html>
