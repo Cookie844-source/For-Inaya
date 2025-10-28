@@ -10,7 +10,7 @@
     margin: 0;
     overflow: hidden;
     height: 100vh;
-    background: linear-gradient(135deg, #2b004b, #4b0078, #2b004b);
+    background: linear-gradient(135deg, #2b004b, #5b007b, #2b004b);
     background-size: 400% 400%;
     animation: gradientFlow 15s ease infinite;
     font-family: "Poppins", sans-serif;
@@ -51,7 +51,6 @@
     margin-bottom: 5px;
   }
 
-  /* 🌈 style du menu langue */
   select {
     background-color: #2a003a !important;
     color: #fff !important;
@@ -105,7 +104,7 @@
     </select>
   </div>
 
-  <div class="footer">For Inaya ✨</div>
+  <div class="footer">For Inaya 💖</div>
 
   <script>
     const canvas = document.getElementById("canvas");
@@ -128,6 +127,7 @@
     };
 
     let particles = [];
+    let hearts = [];
     let speed = 1;
     let color = "#ff69b4";
     let language = "en";
@@ -161,6 +161,39 @@
       }
     }
 
+    class Heart {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = random(0, width);
+        this.y = random(-height, 0);
+        this.size = random(10, 25);
+        this.speed = random(0.5, 1.5);
+        this.opacity = random(0.3, 0.8);
+      }
+      update() {
+        this.y += this.speed;
+        if (this.y > height + 30) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.size / 20, this.size / 20);
+        ctx.beginPath();
+        ctx.moveTo(0, 6);
+        ctx.bezierCurveTo(0, -3, -10, -3, -10, 6);
+        ctx.bezierCurveTo(-10, 13, 0, 20, 0, 25);
+        ctx.bezierCurveTo(0, 20, 10, 13, 10, 6);
+        ctx.bezierCurveTo(10, -3, 0, -3, 0, 6);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.globalAlpha = this.opacity;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
     function createParticles() {
       particles = [];
       for (let i = 0; i < 80; i++) {
@@ -168,12 +201,26 @@
       }
     }
 
+    function createHearts() {
+      hearts = [];
+      for (let i = 0; i < 30; i++) {
+        hearts.push(new Heart());
+      }
+    }
+
     function animate() {
       ctx.clearRect(0, 0, width, height);
+
+      hearts.forEach(h => {
+        h.update();
+        h.draw();
+      });
+
       particles.forEach(p => {
         p.update();
         p.draw();
       });
+
       requestAnimationFrame(animate);
     }
 
@@ -181,6 +228,7 @@
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       createParticles();
+      createHearts();
     });
 
     document.getElementById("speed").addEventListener("input", e => {
@@ -197,6 +245,7 @@
     });
 
     createParticles();
+    createHearts();
     animate();
   </script>
 </body>
