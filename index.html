@@ -8,16 +8,22 @@
   body {
     margin: 0;
     overflow: hidden;
-    background: radial-gradient(circle at center, #1a001f 0%, #000 100%);
+    background: radial-gradient(circle at center, #1a0025 0%, #000 100%);
     font-family: monospace;
-    color: white;
   }
 
-  canvas {
+  #bgCanvas, #matrix {
     position: fixed;
     top: 0;
     left: 0;
+  }
+
+  #bgCanvas {
     z-index: 0;
+  }
+
+  #matrix {
+    z-index: 1;
   }
 
   #controls {
@@ -57,12 +63,75 @@
   </label>
 </div>
 
+<canvas id="bgCanvas"></canvas>
 <canvas id="matrix"></canvas>
 
 <script>
+  const bgCanvas = document.getElementById('bgCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
 
+  function resizeCanvas() {
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // --- Fond animé visible ---
+  const particles = [];
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      r: Math.random() * 3 + 1.5,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random(),
+      flicker: Math.random() * 0.05 + 0.01
+    });
+  }
+
+  let gradientShift = 0;
+  function drawBackground() {
+    gradientShift += 0.002;
+    const gradient = bgCtx.createRadialGradient(
+      bgCanvas.width / 2 + Math.sin(gradientShift) * 200,
+      bgCanvas.height / 2 + Math.cos(gradientShift) * 200,
+      100,
+      bgCanvas.width / 2,
+      bgCanvas.height / 2,
+      bgCanvas.width / 1.2
+    );
+    gradient.addColorStop(0, "#2a003a");
+    gradient.addColorStop(1, "#000");
+
+    bgCtx.fillStyle = gradient;
+    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+    for (let p of particles) {
+      p.alpha += (Math.random() - 0.5) * p.flicker;
+      p.alpha = Math.max(0.1, Math.min(1, p.alpha));
+
+      bgCtx.beginPath();
+      bgCtx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+      bgCtx.fillStyle = `rgba(255, 130, 230, ${p.alpha})`;
+      bgCtx.shadowColor = "#ff66cc";
+      bgCtx.shadowBlur = 15;
+      bgCtx.fill();
+
+      p.x += p.dx;
+      p.y += p.dy;
+
+      if (p.x < 0 || p.x > bgCanvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > bgCanvas.height) p.dy *= -1;
+    }
+  }
+
+  // --- Texte pluie ---
   const speedControl = document.getElementById('speed');
   const colorPicker = document.getElementById('color');
   const langSelect = document.getElementById('lang');
@@ -78,16 +147,12 @@
   };
 
   let words = languages.en;
-
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
   const drops = [];
   const gravity = 0.35;
   const fontSize = 24;
 
   function createDrop() {
-    if (drops.length < 60 && Math.random() < 0.3) {
+    if (drops.length < 70 && Math.random() < 0.3) {
       drops.push({
         x: Math.random() * canvas.width,
         y: -40,
@@ -98,7 +163,7 @@
     }
   }
 
-  function draw() {
+  function drawRain() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + "px monospace";
@@ -110,7 +175,7 @@
       ctx.fillStyle = color;
       ctx.globalAlpha = d.opacity;
       ctx.shadowColor = color;
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 10;
       ctx.fillText(d.text, d.x, d.y);
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
@@ -124,16 +189,16 @@
     createDrop();
   }
 
-  setInterval(draw, 40);
+  function animate() {
+    drawBackground();
+    drawRain();
+    requestAnimationFrame(animate);
+  }
+  animate();
 
   speedControl.oninput = () => (speed = speedControl.value);
   colorPicker.oninput = () => (color = colorPicker.value);
   langSelect.onchange = () => (words = languages[langSelect.value]);
-
-  window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
 </script>
 
 </body>
