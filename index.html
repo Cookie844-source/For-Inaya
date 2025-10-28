@@ -36,23 +36,13 @@
     display: block;
     margin-top: 6px;
   }
-
-  h1 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff69b4;
-    text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff69b4;
-    font-size: 3em;
-  }
 </style>
 </head>
 <body>
 
 <div id="controls">
   <label>💨 Vitesse :
-    <input type="range" id="speed" min="10" max="100" value="40">
+    <input type="range" id="speed" min="10" max="100" value="60">
   </label>
   <label>🎨 Couleur :
     <input type="color" id="color" value="#ff69b4">
@@ -67,7 +57,6 @@
   </label>
 </div>
 
-<h1 id="centerText">Je t’aime Inaya ❤️</h1>
 <canvas id="matrix"></canvas>
 
 <script>
@@ -76,33 +65,31 @@
   const speedControl = document.getElementById('speed');
   const colorPicker = document.getElementById('color');
   const langSelect = document.getElementById('lang');
-  const centerText = document.getElementById('centerText');
 
   let color = colorPicker.value;
-  let speed = 40;
-  let words = ["Je t’aime Inaya"];
+  let speed = 60;
+  let words = ["Je t’aime 💖", "Mon amour 💞", "Toujours ❤️"];
 
   const languages = {
-    fr: ["Je t’aime Inaya", "Mon amour 💖", "Toujours 💞"],
-    en: ["I love you Inaya", "My love 💕", "Forever 💘"],
-    de: ["Ich liebe dich Inaya", "Mein Schatz 💞", "Für immer 💗"],
-    pl: ["Kocham cię Inaya", "Moja miłość 💘", "Na zawsze 💕"]
+    fr: ["Je t’aime 💖", "Mon amour 💞", "Toujours ❤️"],
+    en: ["I love you 💕", "My love 💘", "Forever 💖"],
+    de: ["Ich liebe dich 💞", "Mein Schatz 💕", "Für immer 💗"],
+    pl: ["Kocham cię 💘", "Moja miłość 💕", "Na zawsze 💖"]
   };
 
   canvas.height = window.innerHeight;
   canvas.width = window.innerWidth;
 
-  const fontSize = 22;
+  const fontSize = 26;
   const drops = [];
 
-  // Crée des gouttes espacées et calmes
   function createDrop() {
-    if (drops.length < 40 && Math.random() < 0.1) { 
+    if (drops.length < 60 && Math.random() < 0.15) { 
       drops.push({
         x: Math.random() * canvas.width,
-        y: -30,
+        y: -40,
         text: words[Math.floor(Math.random() * words.length)],
-        speed: Math.random() * 1.5 + 0.5,
+        speed: Math.random() * 1.8 + 1.2,
         opacity: 0
       });
     }
@@ -116,11 +103,14 @@
 
     for (let i = 0; i < drops.length; i++) {
       const d = drops[i];
-      d.opacity = Math.min(d.opacity + 0.02, 1);
+      d.opacity = Math.min(d.opacity + 0.03, 1);
       ctx.fillStyle = color;
       ctx.globalAlpha = d.opacity;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
       ctx.fillText(d.text, d.x, d.y);
       ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
       d.y += d.speed * (speed / 50);
       if (d.y > canvas.height + 50) drops.splice(i, 1);
     }
@@ -128,7 +118,7 @@
     createDrop();
   }
 
-  setInterval(draw, 50);
+  setInterval(draw, 45);
 
   speedControl.oninput = () => {
     speed = speedControl.value;
@@ -136,14 +126,11 @@
 
   colorPicker.oninput = () => {
     color = colorPicker.value;
-    centerText.style.color = color;
-    centerText.style.textShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
   };
 
   langSelect.onchange = () => {
     const selected = langSelect.value;
     words = languages[selected];
-    centerText.textContent = words[0];
   };
 
   window.addEventListener("resize", () => {
