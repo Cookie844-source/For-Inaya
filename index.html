@@ -1,190 +1,170 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For Inaya 💖</title>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100%;
-    background: radial-gradient(circle at top, #0a0a0a, #000);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I love you forever</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #0b001a, #000);
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
 
-  canvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-  }
+    /* Panneau de contrôle */
+    #controlPanel {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+      z-index: 10;
+      color: #fff;
+      font-size: 14px;
+    }
 
-  #toggleMode {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ff8bd1, #8b5cff);
-    box-shadow: 0 0 10px #ff8bd1;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
-  #toggleMode:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #ffbdf0;
-  }
-</style>
+    label, select, input {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Cœurs flottants */
+    .heart {
+      position: absolute;
+      color: #ff77b5;
+      font-size: 16px;
+      opacity: 0.8;
+      animation: floatUp 6s linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0.8; }
+      100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-<canvas id="loveCanvas"></canvas>
-<button id="toggleMode"></button>
+  <div id="controlPanel">
+    <label for="speed">💨 Speed:</label>
+    <input type="range" id="speed" min="1" max="10" value="5">
 
-<script>
-const canvas = document.getElementById('loveCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+    <label for="color">🎨 Color mode:</label>
+    <select id="color">
+      <option value="gradient">Gradient</option>
+      <option value="pink">Pink</option>
+      <option value="white">White</option>
+      <option value="blue">Blue</option>
+    </select>
+  </div>
 
-let words = [
-  "Je t’aime pour toujours",      // Français
-  "I love you forever",           // Anglais
-  "Ich liebe dich für immer",     // Allemand
-  "Kocham cię na zawsze",         // Polonais
-  "Te amo para siempre",          // Espagnol
-  "Ti amo per sempre",            // Italien
-  "Eu te amo para sempre",        // Portugais
-  "愛してる 永遠に",             // Japonais
-  "أحبك إلى الأبد",             // Arabe
-  "영원히 사랑해",              // Coréen
-];
+  <canvas id="rain"></canvas>
 
-let drops = [];
-let hearts = [];
-let stars = [];
-let lightMode = false;
+  <script>
+    const canvas = document.getElementById('rain');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-for (let i = 0; i < 70; i++) {
-  drops.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height - canvas.height,
-    speed: 2 + Math.random() * 3,
-    text: words[Math.floor(Math.random() * words.length)],
-    size: 20 + Math.random() * 10
-  });
-}
+    const words = [];
+    const text = "I love you forever";
+    const fontSize = 28;
+    const gravity = 0.5;
+    const splash = [];
 
-for (let i = 0; i < 20; i++) {
-  hearts.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: 10 + Math.random() * 15,
-    speed: 0.5 + Math.random() * 0.5,
-    opacity: 0.4 + Math.random() * 0.6
-  });
-}
-
-for (let i = 0; i < 30; i++) {
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: 2 + Math.random() * 3,
-    twinkle: Math.random()
-  });
-}
-
-function drawGradientBackground() {
-  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, '#ff77e9');
-  gradient.addColorStop(0.5, '#8b5cff');
-  gradient.addColorStop(1, '#00d4ff');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawHearts() {
-  hearts.forEach(h => {
-    ctx.globalAlpha = h.opacity;
-    ctx.fillStyle = "#ff7eb9";
-    ctx.beginPath();
-    ctx.moveTo(h.x, h.y);
-    ctx.bezierCurveTo(h.x - h.size/2, h.y - h.size/2, h.x - h.size, h.y + h.size/3, h.x, h.y + h.size);
-    ctx.bezierCurveTo(h.x + h.size, h.y + h.size/3, h.x + h.size/2, h.y - h.size/2, h.x, h.y);
-    ctx.fill();
-    h.y -= h.speed;
-    if (h.y < -10) h.y = canvas.height + 10;
-  });
-  ctx.globalAlpha = 1;
-}
-
-function drawStars() {
-  stars.forEach(s => {
-    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + s.twinkle);
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-}
-
-let splashes = [];
-function splash(x, y) {
-  splashes.push({x, y, radius: 1, alpha: 1});
-}
-function drawSplashes() {
-  splashes.forEach((s, i) => {
-    ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-    ctx.stroke();
-    s.radius += 0.8;
-    s.alpha -= 0.02;
-    if (s.alpha <= 0) splashes.splice(i, 1);
-  });
-}
-
-function drawDrops() {
-  drops.forEach(d => {
-    const grad = ctx.createLinearGradient(d.x, d.y - d.size, d.x, d.y + d.size);
-    grad.addColorStop(0, "#ff7ae6");
-    grad.addColorStop(0.5, "#8b5cff");
-    grad.addColorStop(1, "#00d4ff");
-    ctx.fillStyle = grad;
-    ctx.font = `${d.size}px Arial`;
-    ctx.fillText(d.text, d.x, d.y);
-    d.y += d.speed;
-    if (d.y > canvas.height) {
-      splash(d.x, canvas.height - 10);
-      d.y = -20;
-      d.x = Math.random() * canvas.width;
-      d.text = words[Math.floor(Math.random() * words.length)];
+    // Fonction couleur dégradée
+    function gradientColor(y) {
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#ff77b5');
+      gradient.addColorStop(0.5, '#a855f7');
+      gradient.addColorStop(1, '#4fc3f7');
+      return gradient;
     }
-  });
-}
 
-function animate() {
-  drawGradientBackground();
-  drawStars();
-  drawHearts();
-  drawDrops();
-  drawSplashes();
-  requestAnimationFrame(animate);
-}
-animate();
+    // Génération de mots
+    function createWord() {
+      return {
+        x: Math.random() * width,
+        y: -fontSize,
+        speed: Math.random() * 3 + 2,
+        text: text,
+        opacity: Math.random() * 0.5 + 0.5
+      };
+    }
 
-// 🌙 Bouton jour/nuit
-document.getElementById("toggleMode").addEventListener("click", () => {
-  lightMode = !lightMode;
-  if (lightMode) {
-    document.body.style.background = "radial-gradient(circle at top, #ffe3f8, #ffb6e6)";
-  } else {
-    document.body.style.background = "radial-gradient(circle at top, #0a0a0a, #000)";
-  }
-});
-</script>
+    // Génération de cœurs
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.textContent = '❤️';
+      heart.style.left = Math.random() * window.innerWidth + 'px';
+      heart.style.bottom = '0px';
+      heart.style.fontSize = Math.random() * 16 + 10 + 'px';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 6000);
+    }
+
+    // Éclaboussures lumineuses
+    function createSplash(x, y) {
+      splash.push({ x, y, radius: 0, alpha: 1 });
+    }
+
+    function drawSplash() {
+      for (let i = splash.length - 1; i >= 0; i--) {
+        const s = splash[i];
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${s.alpha})`;
+        ctx.stroke();
+        s.radius += 1.5;
+        s.alpha -= 0.03;
+        if (s.alpha <= 0) splash.splice(i, 1);
+      }
+    }
+
+    // Animation
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (let w of words) {
+        w.y += w.speed * (document.getElementById('speed').value / 5);
+        if (w.y > height - 20) {
+          createSplash(w.x, height - 30);
+          w.y = -fontSize;
+          w.x = Math.random() * width;
+        }
+        ctx.font = `${fontSize}px Poppins`;
+        ctx.fillStyle = (document.getElementById('color').value === "gradient")
+          ? gradientColor(w.y)
+          : document.getElementById('color').value;
+        ctx.globalAlpha = w.opacity;
+        ctx.fillText(w.text, w.x, w.y);
+      }
+      drawSplash();
+      requestAnimationFrame(animate);
+    }
+
+    // Initialisation
+    for (let i = 0; i < 40; i++) words.push(createWord());
+    setInterval(createHeart, 1000);
+    animate();
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+  </script>
 </body>
 </html>
