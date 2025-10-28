@@ -20,11 +20,7 @@
       100% { background-position: 0% 50%; }
     }
 
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+    canvas { position: absolute; top: 0; left: 0; }
 
     .control-panel {
       position: absolute;
@@ -36,6 +32,7 @@
       border-radius: 12px;
       font-size: 14px;
       box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
+      z-index: 10;
     }
 
     .control-panel label {
@@ -44,24 +41,70 @@
       font-weight: 500;
     }
 
-    input[type="color"], input[type="range"], select {
+    input[type="color"], input[type="range"] {
       margin-top: 4px;
       width: 150px;
     }
 
-    /* Correction du menu déroulant blanc */
-    select {
-      background-color: #1a001a;
-      color: #fff;
-      border: 1px solid #ff69b4;
-      border-radius: 6px;
-      padding: 5px;
-      font-family: "Poppins", sans-serif;
+    /* Menu langue personnalisé */
+    .language-menu {
+      position: relative;
+      width: 180px;
+      margin-top: 8px;
+      user-select: none;
+      cursor: pointer;
     }
 
-    select option {
+    .selected-lang {
       background-color: #1a001a;
+      border: 1px solid #ff69b4;
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       color: #fff;
+    }
+
+    .selected-lang img {
+      width: 20px;
+      height: 14px;
+      margin-right: 6px;
+    }
+
+    .language-options {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      right: 0;
+      background-color: #1a001a;
+      border: 1px solid #ff69b4;
+      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      z-index: 20;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .language-option {
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      transition: background 0.2s;
+    }
+
+    .language-option:hover {
+      background-color: #ff69b4;
+      color: #000;
+    }
+
+    .language-option img {
+      width: 20px;
+      height: 14px;
+      margin-right: 6px;
+      border-radius: 3px;
     }
 
     #signature {
@@ -84,20 +127,14 @@
     <label>💖 Couleur :
       <input type="color" id="colorControl" value="#ff69b4">
     </label>
-    <label>🌍 Langue :
-      <select id="langControl">
-        <option value="en">English — I love you forever</option>
-        <option value="fr">Français — Je t’aime pour toujours</option>
-        <option value="de">Deutsch — Ich liebe dich für immer</option>
-        <option value="pl">Polski — Kocham cię na zawsze</option>
-        <option value="es">Español — Te amo para siempre</option>
-        <option value="it">Italiano — Ti amo per sempre</option>
-        <option value="pt">Português — Eu te amo para sempre</option>
-        <option value="ja">日本語 — 永遠にあなたを愛しています</option>
-        <option value="ar">العربية — أحبك إلى الأبد</option>
-        <option value="ko">한국어 — 영원히 사랑해</option>
-      </select>
-    </label>
+    <label>🌍 Langue :</label>
+    <div class="language-menu" id="langMenu">
+      <div class="selected-lang" id="selectedLang">
+        <img src="https://flagcdn.com/w20/gb.png" alt="flag">
+        <span>English — I love you forever</span>
+      </div>
+      <div class="language-options" id="langOptions"></div>
+    </div>
   </div>
 
   <div id="signature">For Inaya ✨</div>
@@ -105,11 +142,8 @@
   <script>
     const canvas = document.getElementById("rain");
     const ctx = canvas.getContext("2d");
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+    let width = window.innerWidth, height = window.innerHeight;
+    canvas.width = width; canvas.height = height;
 
     const messages = {
       en: "I love you forever",
@@ -124,78 +158,81 @@
       ko: "영원히 사랑해"
     };
 
-    const hearts = [];
-    const particles = [];
-    const splashes = [];
-    const texts = [];
+    const flags = {
+      en: "https://flagcdn.com/w20/gb.png",
+      fr: "https://flagcdn.com/w20/fr.png",
+      de: "https://flagcdn.com/w20/de.png",
+      pl: "https://flagcdn.com/w20/pl.png",
+      es: "https://flagcdn.com/w20/es.png",
+      it: "https://flagcdn.com/w20/it.png",
+      pt: "https://flagcdn.com/w20/pt.png",
+      ja: "https://flagcdn.com/w20/jp.png",
+      ar: "https://flagcdn.com/w20/sa.png",
+      ko: "https://flagcdn.com/w20/kr.png"
+    };
 
-    const heartCount = 40;
-    const textCount = 25;
+    const langMenu = document.getElementById("langMenu");
+    const selectedLang = document.getElementById("selectedLang");
+    const langOptions = document.getElementById("langOptions");
 
-    let speed = 2;
-    let color = "#ff69b4";
-    let lang = "en";
+    const langList = Object.keys(messages);
 
-    // Cœurs flottants
+    // Remplir le menu
+    langList.forEach(code => {
+      const opt = document.createElement("div");
+      opt.classList.add("language-option");
+      opt.innerHTML = `<img src="${flags[code]}" alt="${code}"> ${messages[code]}`;
+      opt.onclick = () => setLanguage(code);
+      langOptions.appendChild(opt);
+    });
+
+    let lang = "en", speed = 2, color = "#ff69b4";
+    const hearts = [], particles = [], splashes = [], texts = [];
+    const heartCount = 40, textCount = 25;
+
+    // Menu déroulant
+    selectedLang.onclick = () => {
+      langOptions.style.display = langOptions.style.display === "flex" ? "none" : "flex";
+    };
+
+    function setLanguage(code) {
+      lang = code;
+      selectedLang.innerHTML = `<img src="${flags[code]}" alt="${code}"> <span>${messages[code]}</span>`;
+      langOptions.style.display = "none";
+    }
+
+    // Cœurs
     for (let i = 0; i < heartCount; i++) {
-      hearts.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 8 + 4,
-        speed: Math.random() * 0.5 + 0.2,
-        opacity: Math.random() * 0.6 + 0.2,
-      });
+      hearts.push({ x: Math.random() * width, y: Math.random() * height, size: Math.random() * 8 + 4, speed: Math.random() * 0.5 + 0.2, opacity: Math.random() * 0.6 + 0.2 });
     }
 
-    // Textes tombants
+    // Textes
     function createText() {
-      texts.push({
-        text: messages[lang],
-        x: Math.random() * width,
-        y: -50,
-        speed: Math.random() * 1.5 + speed,
-        size: Math.random() * 24 + 20,
-      });
+      texts.push({ text: messages[lang], x: Math.random() * width, y: -50, speed: Math.random() * 1.5 + speed, size: Math.random() * 24 + 20 });
     }
 
-    // Particules spéciales
-    function createParticles() {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        radius: Math.random() * 2,
-        opacity: Math.random(),
-        speed: Math.random() * 0.3 + 0.2,
-      });
-    }
+    // Particules
+    for (let i = 0; i < 60; i++)
+      particles.push({ x: Math.random() * width, y: Math.random() * height, radius: Math.random() * 2, opacity: Math.random(), speed: Math.random() * 0.3 + 0.2 });
 
-    for (let i = 0; i < 60; i++) createParticles();
-
-    // Animation principale
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      // Cœurs
-      hearts.forEach((h) => {
+      hearts.forEach(h => {
         ctx.fillStyle = `rgba(255, 105, 180, ${h.opacity})`;
-        ctx.beginPath();
         ctx.font = `${h.size}px Arial`;
         ctx.fillText("♥", h.x, h.y);
         h.y -= h.speed;
         if (h.y < -10) h.y = height + 10;
       });
 
-      // Particules
-      particles.forEach((p) => {
+      particles.forEach(p => {
         ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
         p.y += p.speed;
         if (p.y > height) p.y = 0;
       });
 
-      // Textes tombants
       texts.forEach((t, i) => {
         const gradient = ctx.createLinearGradient(t.x, t.y, t.x, t.y + t.size);
         gradient.addColorStop(0, "#ff69b4");
@@ -203,7 +240,6 @@
         ctx.fillStyle = gradient;
         ctx.font = `${t.size}px Poppins`;
         ctx.fillText(t.text, t.x, t.y);
-
         t.y += t.speed;
         if (t.y > height) {
           texts.splice(i, 1);
@@ -211,7 +247,6 @@
         }
       });
 
-      // Éclaboussures
       splashes.forEach((s, i) => {
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
@@ -232,22 +267,12 @@
     setInterval(() => createText(), 800);
     draw();
 
-    // Contrôles
-    document.getElementById("speedControl").addEventListener("input", (e) => {
-      speed = parseFloat(e.target.value);
-    });
-    document.getElementById("colorControl").addEventListener("input", (e) => {
-      color = e.target.value;
-    });
-    document.getElementById("langControl").addEventListener("change", (e) => {
-      lang = e.target.value;
-    });
+    document.getElementById("speedControl").addEventListener("input", e => speed = parseFloat(e.target.value));
+    document.getElementById("colorControl").addEventListener("input", e => color = e.target.value);
 
     window.addEventListener("resize", () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      width = window.innerWidth; height = window.innerHeight;
+      canvas.width = width; canvas.height = height;
     });
   </script>
 </body>
