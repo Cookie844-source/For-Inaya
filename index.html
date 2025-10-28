@@ -1,420 +1,254 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>For Inaya — Rain of Love</title>
-<style>
-  :root{
-    --panel-bg: rgba(0,0,0,0.65);
-    --panel-color: #fff;
-  }
-  html,body{
-    height:100%;
-    margin:0;
-    background: radial-gradient(circle at center, #0a0010 0%, #000 100%);
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow:hidden;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Inaya ✨</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      overflow: hidden;
+      height: 100vh;
+      background: linear-gradient(45deg, #160020, #3a005a, #001a40);
+      background-size: 300% 300%;
+      animation: gradientMove 12s ease infinite;
+      font-family: "Poppins", sans-serif;
+    }
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-  /* canvases */
-  #bgCanvas, #effectCanvas {
-    position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    display:block;
-  }
-  #effectCanvas { z-index:2; pointer-events:none; } /* top layer for words & splashes */
-  #bgCanvas { z-index:0; }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
 
-  /* control panel */
-  #controls {
-    position: fixed;
-    top:12px;
-    left:12px;
-    z-index:10;
-    background: var(--panel-bg);
-    color: var(--panel-color);
-    padding:12px 14px;
-    border-radius:12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    min-width:180px;
-    user-select:none;
-  }
-  #controls label{display:block;font-size:13px;margin-bottom:8px}
-  #controls input[type="range"]{width:150px}
-  #controls input[type="color"]{width:40px;height:28px;padding:0;border:0;background:transparent;vertical-align:middle}
-  #controls select{width:160px;padding:4px;border-radius:6px;border:0;background:rgba(255,255,255,0.06);color:#fff}
+    .control-panel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(20, 20, 20, 0.85);
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
+    }
 
-  /* small credits (optional) */
-  #credits {
-    position: fixed;
-    bottom:10px;
-    right:12px;
-    z-index:10;
-    color: rgba(255,255,255,0.5);
-    font-size:12px;
-    pointer-events:none;
-  }
+    .control-panel label {
+      display: block;
+      margin-top: 8px;
+      font-weight: 500;
+    }
 
-  /* ensure crisp text */
-  canvas { image-rendering: optimizeSpeed; }
-</style>
+    input[type="color"], input[type="range"], select {
+      margin-top: 4px;
+      width: 150px;
+    }
+
+    /* Correction du menu déroulant blanc */
+    select {
+      background-color: #1a001a;
+      color: #fff;
+      border: 1px solid #ff69b4;
+      border-radius: 6px;
+      padding: 5px;
+      font-family: "Poppins", sans-serif;
+    }
+
+    select option {
+      background-color: #1a001a;
+      color: #fff;
+    }
+
+    #signature {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      color: #ffb6e6;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="rain"></canvas>
 
-<div id="controls" aria-label="Contrôles">
-  <label>💨 Vitesse :
-    <input id="speed" type="range" min="20" max="140" value="90" />
-  </label>
-  <label>🎨 Couleur :
-    <input id="color" type="color" value="#ff66cc" />
-  </label>
-  <label>🌍 Langue :
-    <select id="lang">
-      <option value="en" selected>English — I love you</option>
-      <option value="fr">Français — Je t’aime</option>
-      <option value="de">Deutsch — Ich liebe dich</option>
-      <option value="pl">Polski — Kocham cię</option>
-      <option value="es">Español — Te amo</option>
-      <option value="it">Italiano — Ti amo</option>
-      <option value="pt">Português — Eu te amo</option>
-      <option value="ja">日本語 — 愛してる</option>
-      <option value="ar">العربية — أحبك إلى الأبد</option>
-      <option value="ko">한국어 — 영원히 사랑해</option>
-    </select>
-  </label>
-</div>
+  <div class="control-panel">
+    <label>🌸 Vitesse :
+      <input type="range" id="speedControl" min="0.5" max="5" value="2" step="0.1">
+    </label>
+    <label>💖 Couleur :
+      <input type="color" id="colorControl" value="#ff69b4">
+    </label>
+    <label>🌍 Langue :
+      <select id="langControl">
+        <option value="en">English — I love you forever</option>
+        <option value="fr">Français — Je t’aime pour toujours</option>
+        <option value="de">Deutsch — Ich liebe dich für immer</option>
+        <option value="pl">Polski — Kocham cię na zawsze</option>
+        <option value="es">Español — Te amo para siempre</option>
+        <option value="it">Italiano — Ti amo per sempre</option>
+        <option value="pt">Português — Eu te amo para sempre</option>
+        <option value="ja">日本語 — 永遠にあなたを愛しています</option>
+        <option value="ar">العربية — أحبك إلى الأبد</option>
+        <option value="ko">한국어 — 영원히 사랑해</option>
+      </select>
+    </label>
+  </div>
 
-<canvas id="bgCanvas"></canvas>
-<canvas id="effectCanvas"></canvas>
+  <div id="signature">For Inaya ✨</div>
 
-<div id="credits">For Inaya ✨</div>
+  <script>
+    const canvas = document.getElementById("rain");
+    const ctx = canvas.getContext("2d");
 
-<script>
-/* =========================
-   Config & canvas setup
-   ========================= */
-const bgCanvas = document.getElementById('bgCanvas');
-const bgCtx = bgCanvas.getContext('2d');
-const canvas = document.getElementById('effectCanvas');
-const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
-function resize() {
-  bgCanvas.width = innerWidth; bgCanvas.height = innerHeight;
-  canvas.width = innerWidth; canvas.height = innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+    const messages = {
+      en: "I love you forever",
+      fr: "Je t’aime pour toujours",
+      de: "Ich liebe dich für immer",
+      pl: "Kocham cię na zawsze",
+      es: "Te amo para siempre",
+      it: "Ti amo per sempre",
+      pt: "Eu te amo para sempre",
+      ja: "永遠にあなたを愛しています",
+      ar: "أحبك إلى الأبد",
+      ko: "영원히 사랑해"
+    };
 
-/* Controls */
-const speedInput = document.getElementById('speed');
-const colorInput = document.getElementById('color');
-const langSelect = document.getElementById('lang');
-let color = colorInput.value;
-let speed = +speedInput.value;
+    const hearts = [];
+    const particles = [];
+    const splashes = [];
+    const texts = [];
 
-/* words by language (with phrase meaning "for always/forever" included) */
-const languageSets = {
-  en: ["I love you", "My love", "Forever"],
-  fr: ["Je t’aime", "Mon amour", "Pour toujours"],
-  de: ["Ich liebe dich", "Mein Schatz", "Für immer"],
-  pl: ["Kocham cię", "Moja miłość", "Na zawsze"],
-  es: ["Te amo", "Mi amor", "Para siempre"],
-  it: ["Ti amo", "Amore mio", "Per sempre"],
-  pt: ["Eu te amo", "Meu amor", "Para sempre"],
-  ja: ["愛してる", "私の愛", "永遠に"],
-  ar: ["أحبك", "حبي", "إلى الأبد"],
-  ko: ["사랑해", "내 사랑", "영원히"]
-};
+    const heartCount = 40;
+    const textCount = 25;
 
-/* default words: start in English */
-let words = languageSets.en.slice();
+    let speed = 2;
+    let color = "#ff69b4";
+    let lang = "en";
 
-/* =========================
-   Background particles (bigger & brighter)
-   ========================= */
-const particles = [];
-function initParticles() {
-  particles.length = 0;
-  const count = Math.round(Math.max(40, Math.min(160, (bgCanvas.width*bgCanvas.height)/80000)));
-  for (let i=0;i<count;i++){
-    particles.push({
-      x: Math.random()*bgCanvas.width,
-      y: Math.random()*bgCanvas.height,
-      r: Math.random()*3+1.5,
-      dx: (Math.random()-0.5)*0.4,
-      dy: (Math.random()-0.5)*0.4,
-      alpha: 0.3 + Math.random()*0.8,
-      flick: Math.random()*0.03+0.01
-    });
-  }
-}
-initParticles();
-
-/* animated moving gradient center */
-let gradShift = 0;
-
-/* =========================
-   Floating hearts & stars
-   ========================= */
-const hearts = [];
-const stars = [];
-function initHeartsAndStars(){
-  hearts.length = 0; stars.length = 0;
-  const hCount = 18;
-  const sCount = 40;
-  for(let i=0;i<hCount;i++){
-    hearts.push({
-      x: Math.random()*canvas.width,
-      y: Math.random()*canvas.height,
-      size: 8 + Math.random()*18,
-      speed: 0.2 + Math.random()*0.6,
-      alpha: 0.35 + Math.random()*0.6,
-      sway: Math.random()*0.6
-    });
-  }
-  for(let i=0;i<sCount;i++){
-    stars.push({
-      x: Math.random()*canvas.width,
-      y: Math.random()*canvas.height,
-      r: 1 + Math.random()*3,
-      tw: Math.random()*6,
-      phase: Math.random()*Math.PI*2
-    });
-  }
-}
-initHeartsAndStars();
-
-/* =========================
-   Drops (text) & splashes
-   ========================= */
-const drops = [];
-const splashes = [];
-
-function spawnDrop() {
-  // limit number based on width & height
-  const maxDrops = Math.round(Math.max(40, Math.min(120, (canvas.width*canvas.height)/90000)));
-  if (drops.length >= maxDrops) return;
-  if (Math.random() > 0.45) return; // control spawn frequency
-  const txt = words[Math.floor(Math.random()*words.length)];
-  drops.push({
-    x: Math.random()*(canvas.width-80)+40,
-    y: -30 - Math.random()*120,
-    vy: 2 + Math.random()*3,
-    text: txt,
-    opacity: 0,
-    size: 18 + Math.random()*12,
-    rotate: (Math.random()-0.5)*0.08
-  });
-}
-function createSplash(x,y){
-  splashes.push({x,y,r:2,alpha:0.8});
-}
-
-/* =========================
-   Draw background (animated gradient + particles)
-   ========================= */
-function drawBackground(){
-  gradShift += 0.004;
-  const cx = bgCanvas.width/2 + Math.sin(gradShift)*220;
-  const cy = bgCanvas.height/2 + Math.cos(gradShift)*160;
-  const g = bgCtx.createRadialGradient(cx, cy, 80, bgCanvas.width/2, bgCanvas.height/2, Math.max(bgCanvas.width,bgCanvas.height)/1.2);
-  g.addColorStop(0, "#2a003a");
-  g.addColorStop(0.25, "#3a0050");
-  g.addColorStop(0.5, "#25003a");
-  g.addColorStop(1, "#000000");
-  bgCtx.fillStyle = g;
-  bgCtx.fillRect(0,0, bgCanvas.width, bgCanvas.height);
-
-  // particles (brighter and larger)
-  for (let p of particles){
-    p.alpha += (Math.random()-0.5)*p.flick;
-    p.alpha = Math.max(0.1, Math.min(1, p.alpha));
-    bgCtx.beginPath();
-    bgCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    bgCtx.fillStyle = `rgba(255,120,200, ${p.alpha*0.9})`;
-    bgCtx.shadowColor = "#ff66cc";
-    bgCtx.shadowBlur = 14;
-    bgCtx.fill();
-    bgCtx.shadowBlur = 0;
-    p.x += p.dx; p.y += p.dy;
-    if (p.x < -10 || p.x > bgCanvas.width+10) p.dx *= -1;
-    if (p.y < -10 || p.y > bgCanvas.height+10) p.dy *= -1;
-  }
-}
-
-/* =========================
-   Draw hearts & stars
-   ========================= */
-function drawHeartsAndStars(now){
-  // hearts float upward and sway
-  for (let h of hearts){
-    bgCtx.globalAlpha = h.alpha * 0.9;
-    const hue = 320 + Math.sin(now*0.001 + h.sway)*20;
-    bgCtx.fillStyle = `hsla(${hue}, 85%, 65%, ${h.alpha})`;
-    // simple heart path (rounded)
-    const x = h.x, y = h.y;
-    const s = h.size * 0.9;
-    bgCtx.beginPath();
-    bgCtx.moveTo(x, y);
-    bgCtx.bezierCurveTo(x - s/2, y - s/2, x - s, y + s/3, x, y + s);
-    bgCtx.bezierCurveTo(x + s, y + s/3, x + s/2, y - s/2, x, y);
-    bgCtx.fill();
-    h.y -= h.speed;
-    h.x += Math.sin(now*0.001 + h.sway)*0.15;
-    if (h.y < -30) { h.y = bgCanvas.height + 20; h.x = Math.random()*bgCanvas.width; }
-  }
-  bgCtx.globalAlpha = 1;
-
-  // stars twinkle
-  for (let s of stars){
-    const a = 0.3 + 0.7 * (0.5 + 0.5*Math.sin(now*0.002 + s.phase));
-    bgCtx.globalAlpha = a;
-    bgCtx.fillStyle = "#fff";
-    bgCtx.beginPath();
-    bgCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-    bgCtx.fill();
-  }
-  bgCtx.globalAlpha = 1;
-}
-
-/* =========================
-   Draw drops (text) and splashes
-   ========================= */
-function drawDropsAndSplashes(now){
-  ctx.clearRect(0,0,canvas.width, canvas.height);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  // drops
-  for (let i=drops.length-1; i>=0; i--){
-    const d = drops[i];
-    d.opacity = Math.min(1, d.opacity + 0.04);
-    // gradient fill for each word (vertical gradient)
-    const g = ctx.createLinearGradient(d.x, d.y - d.size, d.x, d.y + d.size);
-    // gradient shift colors (rainbow-ish)
-    g.addColorStop(0, color);
-    g.addColorStop(0.5, blendColors(color, '#8b5cff', 0.5));
-    g.addColorStop(1, blendColors(color, '#00d4ff', 0.6));
-    ctx.font = `${Math.round(d.size)}px "Arial", sans-serif`;
-    ctx.save();
-    ctx.globalAlpha = d.opacity;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 14;
-    ctx.fillStyle = g;
-    // slight rotation for natural fall
-    ctx.translate(d.x, d.y);
-    ctx.rotate(d.rotate);
-    ctx.fillText(d.text, 0, 0);
-    ctx.restore();
-    // gravity effect (scaled by speed control)
-    d.vy += 0.06 * (speed/70);
-    d.y += d.vy;
-    // when below bottom create splash and respawn
-    if (d.y > canvas.height + 30){
-      createSplash(d.x, canvas.height - 12);
-      // respawn drop
-      d.y = -30 - Math.random()*120;
-      d.x = Math.random()*(canvas.width-80)+40;
-      d.vy = 2 + Math.random()*3;
-      d.opacity = 0;
-      d.text = words[Math.floor(Math.random()*words.length)];
-      d.size = 16 + Math.random()*14;
-      d.rotate = (Math.random()-0.5)*0.08;
+    // Cœurs flottants
+    for (let i = 0; i < heartCount; i++) {
+      hearts.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 8 + 4,
+        speed: Math.random() * 0.5 + 0.2,
+        opacity: Math.random() * 0.6 + 0.2,
+      });
     }
-  }
 
-  // splashes (circles ripple)
-  for (let i=splashes.length-1;i>=0;i--){
-    const s = splashes[i];
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-    ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-    s.r += 1.8;
-    s.alpha -= 0.03;
-    if (s.alpha <= 0) splashes.splice(i,1);
-  }
-}
+    // Textes tombants
+    function createText() {
+      texts.push({
+        text: messages[lang],
+        x: Math.random() * width,
+        y: -50,
+        speed: Math.random() * 1.5 + speed,
+        size: Math.random() * 24 + 20,
+      });
+    }
 
-/* =========================
-   Utility: blend two hex colors
-   ========================= */
-function blendColors(c1, c2, amount){
-  // c1/c2 in hex '#rrggbb'
-  const [r1,g1,b1] = hexToRgb(c1);
-  const [r2,g2,b2] = hexToRgb(c2);
-  const r = Math.round(r1 + (r2-r1)*amount);
-  const g = Math.round(g1 + (g2-g1)*amount);
-  const b = Math.round(b1 + (b2-b1)*amount);
-  return `rgb(${r},${g},${b})`;
-}
-function hexToRgb(hex){
-  hex = hex.replace('#','');
-  if (hex.length===3) hex = hex.split('').map(s=>s+s).join('');
-  const num = parseInt(hex,16);
-  return [(num>>16)&255, (num>>8)&255, num&255];
-}
+    // Particules spéciales
+    function createParticles() {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2,
+        opacity: Math.random(),
+        speed: Math.random() * 0.3 + 0.2,
+      });
+    }
 
-/* =========================
-   Animation loop
-   ========================= */
-let last = performance.now();
-function loop(now){
-  // background animate
-  drawBackground();
-  drawHeartsAndStars(now);
-  // drops on top
-  spawnDrop();
-  drawDropsAndSplashes(now);
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
+    for (let i = 0; i < 60; i++) createParticles();
 
-/* =========================
-   Event handlers & init
-   ========================= */
-speedInput.addEventListener('input', ()=>{ speed = +speedInput.value; });
-colorInput.addEventListener('input', ()=>{ color = colorInput.value; });
-langSelect.addEventListener('change', ()=> {
-  const val = langSelect.value;
-  words = languageSets[val] ? languageSets[val].slice() : languageSets.en.slice();
-  // refresh existing drops to use new words shortly
-  for (let d of drops){
-    if (Math.random() < 0.25) d.text = words[Math.floor(Math.random()*words.length)];
-  }
-});
+    // Animation principale
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
 
-/* when resizing, reinit particles/hearts/stars to suit new size */
-window.addEventListener('resize', ()=>{ initParticles(); initHeartsAndStars(); });
+      // Cœurs
+      hearts.forEach((h) => {
+        ctx.fillStyle = `rgba(255, 105, 180, ${h.opacity})`;
+        ctx.beginPath();
+        ctx.font = `${h.size}px Arial`;
+        ctx.fillText("♥", h.x, h.y);
+        h.y -= h.speed;
+        if (h.y < -10) h.y = height + 10;
+      });
 
-/* helper: create splash wrapper for canvas context */
-function createSplash(x,y){
-  splashes.push({x,y,r:2,alpha:0.9});
-}
+      // Particules
+      particles.forEach((p) => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        p.y += p.speed;
+        if (p.y > height) p.y = 0;
+      });
 
-/* Fill initial drops array (if empty) */
-(function seedDrops(){
-  const initial = Math.round(Math.max(30, Math.min(80, (canvas.width*canvas.height)/120000)));
-  for (let i=0;i<initial;i++){
-    drops.push({
-      x: Math.random()*(canvas.width-80)+40,
-      y: Math.random()*canvas.height - canvas.height,
-      vy: 2 + Math.random()*3,
-      text: words[Math.floor(Math.random()*words.length)],
-      opacity: Math.random()*0.6,
-      size: 16 + Math.random()*18,
-      rotate: (Math.random()-0.5)*0.08
+      // Textes tombants
+      texts.forEach((t, i) => {
+        const gradient = ctx.createLinearGradient(t.x, t.y, t.x, t.y + t.size);
+        gradient.addColorStop(0, "#ff69b4");
+        gradient.addColorStop(1, "#b26bff");
+        ctx.fillStyle = gradient;
+        ctx.font = `${t.size}px Poppins`;
+        ctx.fillText(t.text, t.x, t.y);
+
+        t.y += t.speed;
+        if (t.y > height) {
+          texts.splice(i, 1);
+          createSplash(t.x, height - 10);
+        }
+      });
+
+      // Éclaboussures
+      splashes.forEach((s, i) => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 105, 180, ${s.opacity})`;
+        ctx.stroke();
+        s.radius += 1;
+        s.opacity -= 0.02;
+        if (s.opacity <= 0) splashes.splice(i, 1);
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    function createSplash(x, y) {
+      splashes.push({ x, y, radius: 2, opacity: 0.6 });
+    }
+
+    setInterval(() => createText(), 800);
+    draw();
+
+    // Contrôles
+    document.getElementById("speedControl").addEventListener("input", (e) => {
+      speed = parseFloat(e.target.value);
     });
-  }
-})();
+    document.getElementById("colorControl").addEventListener("input", (e) => {
+      color = e.target.value;
+    });
+    document.getElementById("langControl").addEventListener("change", (e) => {
+      lang = e.target.value;
+    });
 
-</script>
+    window.addEventListener("resize", () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    });
+  </script>
 </body>
 </html>
