@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>For Inaya ❤️</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       overflow: hidden;
+      font-family: "Poppins", sans-serif;
+      color: white;
       background: linear-gradient(270deg, #ff69b4, #b000b5, #6200ea);
       background-size: 600% 600%;
       animation: gradientShift 15s ease infinite;
-      font-family: "Poppins", sans-serif;
-      color: white;
     }
 
     @keyframes gradientShift {
@@ -28,13 +30,14 @@
       width: 100%;
       height: 100%;
       z-index: 0;
+      pointer-events: none;
     }
 
     .control-panel {
       position: fixed;
       top: 10px;
       left: 10px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       padding: 10px;
       border-radius: 12px;
       backdrop-filter: blur(6px);
@@ -43,6 +46,7 @@
       color: white;
       font-size: 14px;
       user-select: none;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
 
     .control-panel label {
@@ -64,10 +68,6 @@
     option {
       background-color: #2a003a;
       color: white;
-    }
-
-    .flag {
-      margin-right: 5px;
     }
 
     @media (max-width: 600px) {
@@ -139,14 +139,12 @@
     resizeCanvas();
 
     class Drop {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.text = words[currentLang][Math.floor(Math.random() * words[currentLang].length)];
         this.x = Math.random() * width;
         this.y = Math.random() * -height;
-        this.size = 20 + Math.random() * 10;
+        this.size = 18 + Math.random() * 8;
         this.speed = speed + Math.random() * 2;
       }
       update() {
@@ -162,7 +160,7 @@
 
     function createDrops() {
       drops = [];
-      for (let i = 0; i < 30; i++) drops.push(new Drop());
+      for (let i = 0; i < 25; i++) drops.push(new Drop());
     }
     createDrops();
 
